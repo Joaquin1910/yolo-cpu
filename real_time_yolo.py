@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 # Load Yolo
-net = cv2.dnn.readNet("yolov3.weights", "cfg/yolov3.cfg")
+net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
 classes = []
 with open("coco.names", "r") as f:
     classes = [line.strip() for line in f.readlines()]
@@ -21,7 +21,7 @@ starting_time = time.time()
 frame_id = 0
 while True:
     _, frame = cap.read()
-    frame_id += 1
+    start_time = time.time()
 
     height, width, channels = frame.shape
 
@@ -57,6 +57,8 @@ while True:
 
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.8, 0.3)
 
+    vlabel = "Sin deteccion"
+
     for i in range(len(boxes)):
         if i in indexes:
             x, y, w, h = boxes[i]
@@ -65,14 +67,16 @@ while True:
             color = colors[class_ids[i]]
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
             cv2.putText(frame, label + " " + str(round(confidence, 2)), (x, y + 30), font, 3, color, 3)
+            vlabel = label
+     
 
-
-
-    elapsed_time = time.time() - starting_time
-    fps = frame_id / elapsed_time
-    print("Executime time: ", elapsed_time)
-    cv2.putText(frame, "FPS: " + str(round(fps, 2)), (10, 50), font, 4, (0, 0, 0), 3)
-    cv2.imshow("Image", frame)
+    end_time = time.time()
+    fps = 1.0 / (end_time-start_time)
+    print("Executime time: ", end_time - start_time)
+    print("fps: ", fps)
+    print("Objeto detectado: ", vlabel)
+#    cv2.putText(frame, "FPS: " + str(round(fps, 2)), (10, 50), font, 4, (0, 0, 0), 3)
+#    cv2.imshow("Image", frame)
     key = cv2.waitKey(1)
     if key == 27:
         break
